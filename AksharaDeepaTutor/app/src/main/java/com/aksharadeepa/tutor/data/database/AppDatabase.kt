@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.aksharadeepa.tutor.data.model.*
 import com.aksharadeepa.tutor.MockDataHelper
 import kotlinx.coroutines.CoroutineScope
@@ -39,9 +38,14 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "aksharadeepa_database"
                 )
-                .fallbackToDestructiveMigration()
-                .build()
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    MockDataHelper.prepopulateDb(instance)
+                }
+
                 instance
             }
         }

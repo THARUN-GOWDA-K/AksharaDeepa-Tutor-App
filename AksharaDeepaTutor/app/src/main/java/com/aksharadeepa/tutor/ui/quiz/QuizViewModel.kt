@@ -14,6 +14,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.util.Calendar
+import kotlin.random.Random
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
@@ -55,13 +57,21 @@ class QuizViewModel @Inject constructor(
     fun startQuiz(chapter: Chapter) {
         viewModelScope.launch {
             _currentChapter.value = chapter
-            _questions.value = quizRepository.getQuestionsForChapter(chapter.id)
+            val allQuestions = quizRepository.getQuestionsForChapter(chapter.id)
+            val seed = dailySeed(chapter.id)
+            _questions.value = allQuestions.shuffled(Random(seed)).take(5)
             _currentQuestionIndex.value = 0
             _userAnswers.value = emptyList()
             _quizState.value = QuizState.InProgress
             _aiTips.value = null
             startTimer()
         }
+    }
+
+    private fun dailySeed(chapterId: Long): Int {
+        val calendar = Calendar.getInstance()
+        val daySeed = calendar.get(Calendar.YEAR) * 1000 + calendar.get(Calendar.DAY_OF_YEAR)
+        return (chapterId * 1000L + daySeed).toInt()
     }
 
     private fun startTimer() {
@@ -131,13 +141,14 @@ class QuizViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val prompt = "The student scored $score/${_questions.value.size} on the chapter '${chapter.chapterName}' (${chapter.subject}). The questions they got wrong were: $wrongQuestionsText. Give 3 short, friendly, encouraging study tips tailored to these specific weak areas. Keep each tip under 2 sentences."
-                
-                if (BuildConfig.ANTHROPIC_API_KEY.contains("sk-ant-api")) {
+
+                val apiKey = BuildConfig.ANTHROPIC_API_KEY.trim()
+                if (apiKey.isEmpty()) {
                     delay(1000)
                     _aiTips.value = "Here are some tips based on your performance:\n1. Review the key concepts for this chapter.\n2. Practice more problems on the topics you missed.\n3. Take short breaks to retain information better! You've got this!"
                 } else {
                     val response = anthropicApi.getCompletion(
-                        apiKey = BuildConfig.ANTHROPIC_API_KEY,
+                        apiKey = apiKey,
                         request = AnthropicRequest(
                             messages = listOf(AnthropicMessage(role = "user", content = prompt))
                         )

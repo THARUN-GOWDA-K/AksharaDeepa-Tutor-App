@@ -1,17 +1,20 @@
 package com.aksharadeepa.tutor.ui.goal
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aksharadeepa.tutor.ui.theme.*
 import com.aksharadeepa.tutor.data.model.Chapter
@@ -38,13 +41,19 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel(), onTakeQuiz: (Cha
         label = ""
     )
 
+    val headerBrush = Brush.verticalGradient(listOf(SoftSage, SageMist))
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(headerBrush)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Daily Goal", style = MaterialTheme.typography.headlineMedium)
+        Text("Daily Goal", style = MaterialTheme.typography.displayLarge)
+        Text("Small steps, big mastery.", style = MaterialTheme.typography.bodyMedium, color = TextGray)
 
-        Card(modifier = Modifier.padding(vertical = 16.dp).fillMaxWidth()) {
+        Card(modifier = Modifier.padding(vertical = 16.dp).fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = SurfaceWhite)) {
             Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.Center) {
                 Text("🔥 ${streakData?.currentStreak ?: 0} Day Streak", style = MaterialTheme.typography.titleLarge, color = DeepOlive)
             }
@@ -55,30 +64,32 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel(), onTakeQuiz: (Cha
                 progress = progressRatio,
                 modifier = Modifier.fillMaxSize(),
                 strokeWidth = 16.dp,
-                color = if (isMet) SuccessGreen else DeepOlive
+                color = if (isMet) SuccessGreen else AccentTeal,
+                trackColor = BorderSoft
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.scale(scale)) {
-                Text("$currentCount / $goalTarget", style = MaterialTheme.typography.headlineLarge)
-                Text("Chapters Today")
+                Text("$currentCount / $goalTarget", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text("Chapters Today", style = MaterialTheme.typography.bodyMedium, color = TextGray)
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         if (isMet) {
-            Text("🎉 Well done! Goal Met!", style = MaterialTheme.typography.titleLarge, color = SuccessGreen, modifier = Modifier.scale(scale))
+            Text("Goal Met!", style = MaterialTheme.typography.titleLarge, color = SuccessGreen, modifier = Modifier.scale(scale))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = SurfaceWhite)) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Set Daily Goal", style = MaterialTheme.typography.titleMedium)
                 Slider(
                     value = goalTarget.toFloat(),
                     onValueChange = { viewModel.setGoalTarget(it.toInt()) },
                     valueRange = 1f..10f,
-                    steps = 8
+                    steps = 8,
+                    colors = SliderDefaults.colors(activeTrackColor = AccentTeal, thumbColor = AccentTeal)
                 )
             }
         }
@@ -86,16 +97,19 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel(), onTakeQuiz: (Cha
         if (recommendedChapters.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
             Text("Recommended Topics Today", style = MaterialTheme.typography.titleMedium)
-            
-            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
+
+            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(recommendedChapters) { chapter ->
-                    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = SurfaceWhite)) {
                         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(chapter.subject, style = MaterialTheme.typography.labelSmall, color = DeepOlive)
-                                Text(chapter.chapterName, style = MaterialTheme.typography.bodyLarge)
+                                Text(displaySubject(chapter.subject), style = MaterialTheme.typography.labelLarge, color = subjectAccent(chapter.subject))
+                                Text(chapter.chapterName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
                             }
-                            Button(onClick = { onTakeQuiz(chapter) }) {
+                            Button(
+                                onClick = { onTakeQuiz(chapter) },
+                                colors = ButtonDefaults.buttonColors(containerColor = subjectAccent(chapter.subject))
+                            ) {
                                 Text("Take Quiz")
                             }
                         }
@@ -113,4 +127,11 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel(), onTakeQuiz: (Cha
             modifier = Modifier.padding(16.dp)
         )
     }
+}
+
+private fun displaySubject(subject: String): String = when (subject.uppercase()) {
+    "SCIENCE" -> "Science"
+    "MATH" -> "Mathematics"
+    "SOCIAL" -> "Social Studies"
+    else -> subject
 }

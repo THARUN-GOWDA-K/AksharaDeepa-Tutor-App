@@ -1,15 +1,19 @@
 package com.aksharadeepa.tutor.ui.quiz
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyColumn
-import com.aksharadeepa.tutor.ui.theme.ErrorRed
-import com.aksharadeepa.tutor.ui.theme.SuccessGreen
+import com.aksharadeepa.tutor.ui.theme.*
 
 @Composable
 fun QuizSummaryScreen(
@@ -25,31 +29,60 @@ fun QuizSummaryScreen(
     val score = userAnswers.count { it.isCorrect }
     val total = questions.size
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    val headerBrush = Brush.verticalGradient(listOf(SoftSage, SageMist))
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(headerBrush)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         item {
-            Text("Quiz Complete!", style = MaterialTheme.typography.headlineMedium)
-            Text("Chapter: ${chapter?.chapterName}")
-            Text("Score: $score / $total", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(24.dp))
+            Text("Quiz Summary", style = MaterialTheme.typography.displayLarge)
+            Text("Chapter: ${chapter?.chapterName ?: ""}", style = MaterialTheme.typography.bodyMedium, color = TextGray)
+        }
+
+        item {
+            Card(colors = CardDefaults.cardColors(containerColor = SurfaceWhite)) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Your Score", style = MaterialTheme.typography.labelLarge, color = AccentTeal)
+                    Text("$score / $total", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                }
+            }
         }
 
         item {
             if (aiTips != null) {
-                Card(modifier = Modifier.fillMaxWidth()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
+                ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("✨ AI Study Tips", style = MaterialTheme.typography.titleMedium)
-                        Text(aiTips ?: "")
+                        Text("AI Study Tips", style = MaterialTheme.typography.titleMedium)
+                        Text(aiTips ?: "", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             } else {
-                Button(onClick = { viewModel.getAiStudyTips() }, modifier = Modifier.fillMaxWidth()) {
-                    if (isLoadingAi) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                    else Text("✨ Get AI Study Tips")
+                Button(
+                    onClick = { viewModel.getAiStudyTips() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentTeal)
+                ) {
+                    if (isLoadingAi) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text("Get AI Study Tips")
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Review Answers:", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        item {
+            Text("Review Answers", style = MaterialTheme.typography.titleLarge)
         }
 
         items(questions.size) { index ->
@@ -58,44 +91,63 @@ fun QuizSummaryScreen(
             val isCorrect = answer?.isCorrect == true
             
             Card(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isCorrect) SuccessGreen.copy(alpha = 0.1f) else ErrorRed.copy(alpha = 0.1f)
-                )
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Q: ${question.questionText}", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
-                    // Display the actual text of the options instead of just A/B/C/D
-                    val selectedText = when(answer?.selectedOption) {
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    val selectedText = when (answer?.selectedOption) {
                         "A" -> question.optionA
                         "B" -> question.optionB
                         "C" -> question.optionC
                         "D" -> question.optionD
                         else -> "None"
                     }
-                    val correctText = when(question.correctOption) {
+                    val correctText = when (question.correctOption) {
                         "A" -> question.optionA
                         "B" -> question.optionB
                         "C" -> question.optionC
                         "D" -> question.optionD
                         else -> question.correctOption
                     }
-                    
-                    Text("Your Answer: ${answer?.selectedOption ?: "-"} ($selectedText)", color = if (isCorrect) SuccessGreen else ErrorRed)
+
+                    val statusColor = if (isCorrect) SuccessGreen else ErrorRed
+                    val statusLabel = if (isCorrect) "Correct" else "Needs Review"
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Your Answer: ${answer?.selectedOption ?: "-"} ($selectedText)",
+                            color = statusColor
+                        )
+                        Box(
+                            modifier = Modifier.background(statusColor, shape = RoundedCornerShape(6.dp)).padding(6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(statusLabel, color = SurfaceWhite, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                     if (!isCorrect) {
                         Text("Correct Answer: ${question.correctOption} ($correctText)", color = SuccessGreen)
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text("Explanation: ${question.explanation}", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
 
         item {
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onBackToChapters, modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = onBackToChapters,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = DeepOlive)
+            ) {
                 Text("Back to Chapters")
             }
         }

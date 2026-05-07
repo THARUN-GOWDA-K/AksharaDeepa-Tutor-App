@@ -22,6 +22,7 @@ import com.aksharadeepa.tutor.ui.strength.StrengthMapScreen
 import com.aksharadeepa.tutor.ui.syllabus.SyllabusTrackerScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aksharadeepa.tutor.ui.quiz.QuizViewModel
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppNavigation() {
@@ -42,7 +43,10 @@ fun AppNavigation() {
             val hideBottomBar = currentDestination?.route in listOf(Screen.QuizPlay.route, Screen.QuizSummary.route)
 
             if (!hideBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 6.dp
+                ) {
                     items.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = null) },
@@ -56,7 +60,12 @@ fun AppNavigation() {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.secondary
+                            )
                         )
                     }
                 }

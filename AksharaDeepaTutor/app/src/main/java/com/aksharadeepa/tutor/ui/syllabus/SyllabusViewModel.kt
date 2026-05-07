@@ -15,15 +15,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-import com.aksharadeepa.tutor.data.database.AppDatabase
-import kotlinx.coroutines.Dispatchers
 
 @HiltViewModel
 class SyllabusViewModel @Inject constructor(
     private val chapterRepository: ChapterRepository,
     private val quizRepository: QuizRepository,
-    private val goalRepository: GoalRepository,
-    private val database: AppDatabase
+    private val goalRepository: GoalRepository
 ) : ViewModel() {
 
     private val _selectedSubject = MutableStateFlow("SCIENCE")
@@ -39,11 +36,7 @@ class SyllabusViewModel @Inject constructor(
     val allAttempts = quizRepository.getAllAttempts()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            com.aksharadeepa.tutor.MockDataHelper.prepopulateDb(database)
-        }
-    }
+
 
     fun selectSubject(subject: String) {
         _selectedSubject.value = subject

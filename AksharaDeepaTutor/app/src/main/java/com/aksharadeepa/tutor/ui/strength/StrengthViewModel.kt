@@ -62,12 +62,13 @@ class StrengthViewModel @Inject constructor(
 
                 val prompt = "Student asks: '$question'.\nHere is their strength data:\n$strengthDataStr\nWeak chapters: $weakChapters\nStrong chapters: $strongChapters\nRespond as a personal study coach, keep it encouraging and actionable."
 
-                if (BuildConfig.ANTHROPIC_API_KEY.contains("sk-ant-api")) {
+                val apiKey = BuildConfig.ANTHROPIC_API_KEY.trim()
+                if (apiKey.isEmpty()) {
                     kotlinx.coroutines.delay(1000)
                     _aiResponse.value = "Great question! Based on your strength map, you are doing well in ${strongChapters.ifEmpty { "several areas" }}, but you might want to focus more on ${weakChapters.ifEmpty { "reviewing recent topics" }}. Keep up the good work and stay consistent with your daily goals! You're making progress every day!"
                 } else {
                     val response = anthropicApi.getCompletion(
-                        apiKey = BuildConfig.ANTHROPIC_API_KEY,
+                        apiKey = apiKey,
                         request = AnthropicRequest(
                             messages = listOf(AnthropicMessage(role = "user", content = prompt))
                         )
