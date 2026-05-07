@@ -57,7 +57,7 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
         LinearProgressIndicator(
             progress = subjectProgress,
             modifier = Modifier.fillMaxWidth().height(4.dp),
-            color = PrimaryBlue
+            color = DeepOlive
         )
 
         LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -66,24 +66,41 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
                 val scoreText = if (attempt != null) "${(attempt.score * 100) / attempt.totalQuestions}%" else "Not attempted"
 
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (chapter.isCompleted) SuccessGreen.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = chapter.isCompleted,
-                            onCheckedChange = { viewModel.toggleChapterCompletion(chapter, it) }
-                        )
-                        Column(modifier = Modifier.padding(start = 8.dp)) {
-                            Text(chapter.chapterName, style = MaterialTheme.typography.bodyLarge)
-                            Badge(containerColor = PrimaryBlue) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(chapter.chapterName, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                            Badge(containerColor = DeepOlive) {
                                 Text(scoreText, color = SurfaceWhite, modifier = Modifier.padding(4.dp))
                             }
+                        }
+                        
+                        if (chapter.importantConcepts.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Key Concepts:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                            Text(chapter.importantConcepts, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Button(
+                            onClick = { viewModel.toggleChapterCompletion(chapter, !chapter.isCompleted) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (chapter.isCompleted) MaterialTheme.colorScheme.surfaceVariant else DeepOlive,
+                                contentColor = if (chapter.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else SurfaceWhite
+                            )
+                        ) {
+                            Text(if (chapter.isCompleted) "Completed" else "Mark as Complete")
                         }
                     }
                 }

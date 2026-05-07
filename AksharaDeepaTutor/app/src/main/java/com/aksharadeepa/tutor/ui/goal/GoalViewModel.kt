@@ -32,10 +32,33 @@ class GoalViewModel @Inject constructor(
         .map { list -> list.filter { it.isCompleted }.size }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0)
         
+    val recommendedChapters = chapterRepository.getAllChapters()
+        .map { chapters ->
+            val science = chapters.firstOrNull { it.subject == "SCIENCE" && !it.isCompleted }
+            val math = chapters.firstOrNull { it.subject == "MATH" && !it.isCompleted }
+            val social = chapters.firstOrNull { it.subject == "SOCIAL" && !it.isCompleted }
+            listOfNotNull(science, math, social)
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        
     init {
         viewModelScope.launch {
             val progress = goalRepository.getDailyProgress(todayStr).firstOrNull()
             if (progress == null) {
+                // Check if streak is broken
+                val streak = goalRepository.getStreakData().firstOrNull()
+                if (streak != null && streak.lastGoalMetDate.isNotEmpty() && streak.lastGoalMetDate != todayStr) {
+                    val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val lastDate = format.parse(streak.lastGoalMetDate)
+                    val todayDate = format.parse(todayStr)
+                    if (lastDate != null && todayDate != null) {
+                        val diffDays = (todayDate.time - lastDate.time) / (1000 * 60 * 60 * 24)
+                        if (diffDays > 1) {
+                            goalRepository.updateStreakData(StreakData(currentStreak = 0, lastGoalMetDate = streak.lastGoalMetDate))
+                        }
+                    }
+                }
+
                 goalRepository.updateDailyProgress(
                     DailyProgress(
                         date = todayStr,

@@ -44,7 +44,7 @@ fun StrengthMapScreen(viewModel: StrengthViewModel = hiltViewModel()) {
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { showBottomSheet = true }, containerColor = AccentOrange) {
+            FloatingActionButton(onClick = { showBottomSheet = true }, containerColor = SoftSage) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = "Ask AI", tint = Color.White)
             }
         }
@@ -81,8 +81,8 @@ fun StrengthMapScreen(viewModel: StrengthViewModel = hiltViewModel()) {
                         else path.lineTo(point.x, point.y)
                     }
                     path.close()
-                    drawPath(path, color = PrimaryBlue.copy(alpha = 0.5f))
-                    drawPath(path, color = PrimaryBlue, style = Stroke(width = 4f))
+                    drawPath(path, color = DeepOlive.copy(alpha = 0.5f))
+                    drawPath(path, color = DeepOlive, style = Stroke(width = 4f))
                 }
             }
             

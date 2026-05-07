@@ -13,6 +13,7 @@ data class Chapter(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val subject: String,
     val chapterName: String,
+    val importantConcepts: String = "",
     val isCompleted: Boolean = false,
     val orderIndex: Int
 )

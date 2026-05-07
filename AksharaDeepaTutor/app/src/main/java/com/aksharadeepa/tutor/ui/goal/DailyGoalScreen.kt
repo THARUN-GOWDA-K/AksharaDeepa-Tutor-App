@@ -10,13 +10,17 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aksharadeepa.tutor.ui.theme.*
+import com.aksharadeepa.tutor.data.model.Chapter
 
 @Composable
-fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel()) {
+fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel(), onTakeQuiz: (Chapter) -> Unit = {}) {
     val dailyProgress by viewModel.dailyProgress.collectAsState()
     val streakData by viewModel.streakData.collectAsState()
+    val recommendedChapters by viewModel.recommendedChapters.collectAsState()
 
     val goalTarget = dailyProgress?.goalTarget ?: 3
     val currentCount = dailyProgress?.chaptersStudiedCount ?: 0
@@ -42,7 +46,7 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel()) {
 
         Card(modifier = Modifier.padding(vertical = 16.dp).fillMaxWidth()) {
             Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.Center) {
-                Text("🔥 ${streakData?.currentStreak ?: 0} Day Streak", style = MaterialTheme.typography.titleLarge, color = AccentOrange)
+                Text("🔥 ${streakData?.currentStreak ?: 0} Day Streak", style = MaterialTheme.typography.titleLarge, color = DeepOlive)
             }
         }
 
@@ -51,7 +55,7 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel()) {
                 progress = progressRatio,
                 modifier = Modifier.fillMaxSize(),
                 strokeWidth = 16.dp,
-                color = if (isMet) SuccessGreen else PrimaryBlue
+                color = if (isMet) SuccessGreen else DeepOlive
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.scale(scale)) {
                 Text("$currentCount / $goalTarget", style = MaterialTheme.typography.headlineLarge)
@@ -79,7 +83,28 @@ fun DailyGoalScreen(viewModel: GoalViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        if (recommendedChapters.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("Recommended Topics Today", style = MaterialTheme.typography.titleMedium)
+            
+            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                items(recommendedChapters) { chapter ->
+                    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(chapter.subject, style = MaterialTheme.typography.labelSmall, color = DeepOlive)
+                                Text(chapter.chapterName, style = MaterialTheme.typography.bodyLarge)
+                            }
+                            Button(onClick = { onTakeQuiz(chapter) }) {
+                                Text("Take Quiz")
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
 
         Text(
             "\"Success is the sum of small efforts, repeated day in and day out.\"",

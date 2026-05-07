@@ -63,35 +63,36 @@ fun AppNavigation() {
             }
         }
     ) { innerPadding ->
+        val sharedQuizViewModel = hiltViewModel<QuizViewModel>()
+
         NavHost(navController, startDestination = Screen.Syllabus.route, Modifier.padding(innerPadding)) {
             composable(Screen.Syllabus.route) { SyllabusTrackerScreen() }
             composable(Screen.Quiz.route) { 
-                val parentEntry = remember(it) { navController.getBackStackEntry(Screen.Quiz.route) }
-                val quizViewModel = hiltViewModel<QuizViewModel>(parentEntry)
-                QuizModeScreen(quizViewModel) {
+                QuizModeScreen(sharedQuizViewModel) {
                     navController.navigate(Screen.QuizPlay.route)
                 }
             }
             composable(Screen.QuizPlay.route) {
-                val parentEntry = remember(it) { navController.getBackStackEntry(Screen.Quiz.route) }
-                val quizViewModel = hiltViewModel<QuizViewModel>(parentEntry)
-                QuizScreen(quizViewModel) {
+                QuizScreen(sharedQuizViewModel) {
                     navController.navigate(Screen.QuizSummary.route) {
                         popUpTo(Screen.QuizPlay.route) { inclusive = true }
                     }
                 }
             }
             composable(Screen.QuizSummary.route) {
-                val parentEntry = remember(it) { navController.getBackStackEntry(Screen.Quiz.route) }
-                val quizViewModel = hiltViewModel<QuizViewModel>(parentEntry)
-                QuizSummaryScreen(quizViewModel) {
+                QuizSummaryScreen(sharedQuizViewModel) {
                     navController.navigate(Screen.Quiz.route) {
                         popUpTo(Screen.Quiz.route) { inclusive = true }
                     }
                 }
             }
             composable(Screen.Strength.route) { StrengthMapScreen() }
-            composable(Screen.Goal.route) { DailyGoalScreen() }
+            composable(Screen.Goal.route) { 
+                DailyGoalScreen(onTakeQuiz = { chapter ->
+                    sharedQuizViewModel.startQuiz(chapter)
+                    navController.navigate(Screen.QuizPlay.route)
+                }) 
+            }
         }
     }
 }

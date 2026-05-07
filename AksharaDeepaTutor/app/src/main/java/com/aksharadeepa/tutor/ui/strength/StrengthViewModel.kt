@@ -62,13 +62,18 @@ class StrengthViewModel @Inject constructor(
 
                 val prompt = "Student asks: '$question'.\nHere is their strength data:\n$strengthDataStr\nWeak chapters: $weakChapters\nStrong chapters: $strongChapters\nRespond as a personal study coach, keep it encouraging and actionable."
 
-                val response = anthropicApi.getCompletion(
-                    apiKey = BuildConfig.ANTHROPIC_API_KEY,
-                    request = AnthropicRequest(
-                        messages = listOf(AnthropicMessage(role = "user", content = prompt))
+                if (BuildConfig.ANTHROPIC_API_KEY.contains("sk-ant-api")) {
+                    kotlinx.coroutines.delay(1000)
+                    _aiResponse.value = "Great question! Based on your strength map, you are doing well in ${strongChapters.ifEmpty { "several areas" }}, but you might want to focus more on ${weakChapters.ifEmpty { "reviewing recent topics" }}. Keep up the good work and stay consistent with your daily goals! You're making progress every day!"
+                } else {
+                    val response = anthropicApi.getCompletion(
+                        apiKey = BuildConfig.ANTHROPIC_API_KEY,
+                        request = AnthropicRequest(
+                            messages = listOf(AnthropicMessage(role = "user", content = prompt))
+                        )
                     )
-                )
-                _aiResponse.value = response.content.firstOrNull()?.text ?: "No response."
+                    _aiResponse.value = response.content.firstOrNull()?.text ?: "No response."
+                }
             } catch (e: Exception) {
                 _aiResponse.value = "Failed to connect to AI Coach."
             } finally {

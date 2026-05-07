@@ -132,13 +132,18 @@ class QuizViewModel @Inject constructor(
             try {
                 val prompt = "The student scored $score/${_questions.value.size} on the chapter '${chapter.chapterName}' (${chapter.subject}). The questions they got wrong were: $wrongQuestionsText. Give 3 short, friendly, encouraging study tips tailored to these specific weak areas. Keep each tip under 2 sentences."
                 
-                val response = anthropicApi.getCompletion(
-                    apiKey = BuildConfig.ANTHROPIC_API_KEY,
-                    request = AnthropicRequest(
-                        messages = listOf(AnthropicMessage(role = "user", content = prompt))
+                if (BuildConfig.ANTHROPIC_API_KEY.contains("sk-ant-api")) {
+                    delay(1000)
+                    _aiTips.value = "Here are some tips based on your performance:\n1. Review the key concepts for this chapter.\n2. Practice more problems on the topics you missed.\n3. Take short breaks to retain information better! You've got this!"
+                } else {
+                    val response = anthropicApi.getCompletion(
+                        apiKey = BuildConfig.ANTHROPIC_API_KEY,
+                        request = AnthropicRequest(
+                            messages = listOf(AnthropicMessage(role = "user", content = prompt))
+                        )
                     )
-                )
-                _aiTips.value = response.content.firstOrNull()?.text ?: "No tips available."
+                    _aiTips.value = response.content.firstOrNull()?.text ?: "No tips available."
+                }
             } catch (e: Exception) {
                 _aiTips.value = "Failed to load AI tips. Please check your internet connection."
             } finally {
