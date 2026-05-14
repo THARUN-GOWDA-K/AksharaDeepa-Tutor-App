@@ -1,38 +1,48 @@
 package com.aksharadeepa.tutor.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// Core palette
-val DeepOlive = Color(0xFF1A2517)
-val PrimaryDark = Color(0xFF1A2517)
-val SoftSage = Color(0xFFACC8A2)
-val SageMist = Color(0xFFF2F6F1)
-val SurfaceCream = Color(0xFFF8FAF6)
-val InkDark = Color(0xFF1C251C)
-val InkLight = Color(0xFF2B3A2B)
-val BorderSoft = Color(0xFFE1E9DD)
+val GlassBackgroundTop = Color(0xFF0F0C29)
+val GlassBackgroundMid = Color(0xFF302B63)
+val GlassBackgroundBottom = Color(0xFF24243E)
 
-// Accents
-val AccentTeal = Color(0xFF2BAE9A)
-val AccentBlue = Color(0xFF5A8DEE)
-val AccentAmber = Color(0xFFF2B94B)
-val AccentCoral = Color(0xFFEF7B6C)
-val AccentLavender = Color(0xFFB59BF3)
-val AccentMint = Color(0xFF6DD6A0)
+val GlassBackgroundGradient = Brush.verticalGradient(
+	listOf(GlassBackgroundTop, GlassBackgroundMid, GlassBackgroundBottom)
+)
 
-// Semantic colors
-val BackgroundLight = SageMist
-val SurfaceWhite = SurfaceCream
-val TextDark = InkDark
-val TextGray = Color(0xFF5F6C5F)
-val SuccessGreen = Color(0xFF41B97A)
-val ErrorRed = Color(0xFFE05A5A)
-val WarningYellow = Color(0xFFF0B429)
-val GrayBadge = Color(0xFF9CA89C)
+val GlassSurface = Color.White.copy(alpha = 0.10f)
+val GlassSurfaceStrong = Color.White.copy(alpha = 0.15f)
+val GlassBorder = Color.White.copy(alpha = 0.18f)
+val GlassBorderStrong = Color.White.copy(alpha = 0.30f)
+val GlassDivider = Color.White.copy(alpha = 0.12f)
+val GlassTrack = Color.White.copy(alpha = 0.15f)
+val GlassNavBar = Color(0xFF1A1A2E).copy(alpha = 0.85f)
+val GlassNavBorder = Color.White.copy(alpha = 0.15f)
+val GlassSelectedPill = Color.White.copy(alpha = 0.18f)
+
+val TextPrimary = Color.White
+val TextSecondary = Color.White.copy(alpha = 0.80f)
+val TextMuted = Color.White.copy(alpha = 0.55f)
+val TextFaint = Color.White.copy(alpha = 0.45f)
+
+val GradientStart = Color(0xFF7F7FD5)
+val GradientEnd = Color(0xFF91EAE4)
+
+val CorrectGreen = Color(0xFF00C9A7)
+val WrongRed = Color(0xFFFF6B6B)
+val WarningYellow = Color(0xFFF2C94C)
+val BadgeGray = Color.White.copy(alpha = 0.25f)
+
+val SurfaceWhite = GlassSurface
+val BorderSoft = GlassBorder
+val TextGray = TextMuted
+val SuccessGreen = CorrectGreen
+val ErrorRed = WrongRed
 
 fun subjectAccent(subject: String): Color = when (subject.uppercase()) {
-	"SCIENCE" -> AccentTeal
-	"MATH" -> AccentBlue
-	"SOCIAL" -> AccentAmber
-	else -> AccentCoral
+	"SCIENCE" -> GradientStart
+	"MATH" -> GradientEnd
+	"SOCIAL" -> Color(0xFFFFB347)
+	else -> Color(0xFFB06AB3)
 }

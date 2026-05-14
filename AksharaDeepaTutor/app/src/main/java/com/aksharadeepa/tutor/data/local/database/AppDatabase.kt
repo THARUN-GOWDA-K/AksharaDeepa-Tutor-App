@@ -1,11 +1,21 @@
-package com.aksharadeepa.tutor.data.database
+package com.aksharadeepa.tutor.data.local.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.aksharadeepa.tutor.data.model.*
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.aksharadeepa.tutor.MockDataHelper
+import com.aksharadeepa.tutor.data.local.dao.ChapterDao
+import com.aksharadeepa.tutor.data.local.dao.GoalDao
+import com.aksharadeepa.tutor.data.local.dao.QuizDao
+import com.aksharadeepa.tutor.data.local.entities.Chapter
+import com.aksharadeepa.tutor.data.local.entities.DailyProgress
+import com.aksharadeepa.tutor.data.local.entities.QuizAttempt
+import com.aksharadeepa.tutor.data.local.entities.QuizQuestion
+import com.aksharadeepa.tutor.data.local.entities.StreakData
+import com.aksharadeepa.tutor.data.local.entities.UserAnswer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,7 +29,7 @@ import kotlinx.coroutines.launch
         DailyProgress::class,
         StreakData::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -38,7 +48,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "aksharadeepa_database"
                 )
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_6_7)
                     .build()
                 INSTANCE = instance
 
@@ -47,6 +57,12 @@ abstract class AppDatabase : RoomDatabase() {
                 }
 
                 instance
+            }
+        }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE chapters ADD COLUMN completion_date TEXT")
             }
         }
     }

@@ -1,8 +1,8 @@
-# AksharaDeepaTutor 🎓
+# Akshara Deepa Tutor 🎓
 
-A modern, fully-featured educational mobile app for 10th-grade SSLC (Secondary School Leaving Certificate) students in India. Built with Kotlin, Jetpack Compose, and AI-powered study tips using Claude 3 Haiku.
+A modern, AI-powered tutoring platform for 10th-grade SSLC (Secondary School Leaving Certificate) students in India. Built with Kotlin + Jetpack Compose, Room offline caching, Firebase Auth/Firestore, and a FastAPI backend that powers cloud sync and AI study tips.
 
-**Status**: ✅ Production Ready | **Version**: 1.0 | **Last Updated**: May 7, 2026
+**Status**: ✅ Production-Ready Foundation | **Version**: 1.1 | **Last Updated**: May 14, 2026
 
 ---
 
@@ -21,6 +21,10 @@ A modern, fully-featured educational mobile app for 10th-grade SSLC (Secondary S
 4. **Quiz Summary** - Score display with AI-powered study tips
 5. **Strength Map** - Radar chart showing subject performance
 6. **Daily Goal** - Streak tracking and daily learning targets
+
+### App Logo
+- Place the logo file at `app/src/main/res/drawable/akshara_logo.png`
+- Update `SplashScreen` to pass `logoResId = R.drawable.akshara_logo` once the asset is available
 
 ---
 
@@ -81,6 +85,12 @@ A modern, fully-featured educational mobile app for 10th-grade SSLC (Secondary S
 - Database prepopulation with 225 sample questions
 - No data loss on network interruptions
 
+### 🔐 Authentication & Cloud Sync
+- Firebase email/password authentication
+- Student profile stored in Firestore
+- Quiz history and progress synced to cloud
+- Room database used as offline cache
+
 ---
 
 ## 🛠️ Tech Stack
@@ -94,12 +104,16 @@ A modern, fully-featured educational mobile app for 10th-grade SSLC (Secondary S
 | **Dependency Injection** | Hilt | 2.49 |
 | **Database** | Room + SQLite | 2.6.1 |
 | **Networking** | Retrofit + OkHttp | 2.9.0 / 4.12.0 |
-| **AI API** | Anthropic Claude 3 Haiku | - |
+| **AI API** | FastAPI AI Gateway (Gemini / Claude) | - |
 | **Navigation** | Jetpack Navigation Compose | 2.7.6 |
 | **Async** | Coroutines + Flow | 1.7.0 |
 | **Build System** | Gradle | 8.10 |
 | **Target API** | Android 14 (API 34) | Min: API 21 |
 | **Java Version** | Java 17 | - |
+| **Auth** | Firebase Authentication | - |
+| **Cloud DB** | Firebase Firestore | - |
+| **Storage** | Firebase Storage | - |
+| **Backend** | FastAPI + Firebase Admin | - |
 
 ---
 
@@ -327,27 +341,49 @@ git clone https://github.com/THARUN-GOWDA-K/Tutor-App.git
 cd Tutor-App/AksharaDeepaTutor
 ```
 
-#### 2. Configure API Key (Optional - for AI features)
+#### 2. Configure API + Backend (Required for cloud sync & AI)
 
 Create `local.properties` in project root:
 
 ```properties
-# Optional: Add Anthropic API key for Claude 3 Haiku
-ANTHROPIC_API_KEY=sk-ant-api-XXXXXXXXXXXXX
+# Backend base URL (Android emulator default)
+BACKEND_BASE_URL=http://10.0.2.2:8000/
 
-# If not provided, app will use offline tips gracefully
+# Optional: Direct Claude key (legacy fallback)
+ANTHROPIC_API_KEY=sk-ant-api-XXXXXXXXXXXXX
 ```
 
-Get API key from [Anthropic Console](https://console.anthropic.com/)
+Get API key from [Anthropic Console](https://console.anthropic.com/) or use the backend AI gateway.
 
-#### 3. Sync Gradle Files
+#### 3. Firebase Setup
+
+1. Create a Firebase project
+2. Enable Authentication (Email/Password)
+3. Enable Firestore + Storage
+4. Download `google-services.json` and place it in:
+
+```
+app/google-services.json
+```
+
+#### 4. Sync Gradle Files
 
 ```bash
 ./gradlew clean
 ./gradlew sync
 ```
 
-#### 4. Build Project
+#### 5. Start Backend (FastAPI)
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### 6. Build Project
 
 ```bash
 ./gradlew build
@@ -429,39 +465,29 @@ Get API key from [Anthropic Console](https://console.anthropic.com/)
 
 ## 🧠 AI Integration Details
 
-### How Claude 3 Haiku Works
+### AI Study Tips (Backend Gateway)
 
 1. **API Setup**
    ```kotlin
-   // Retrofit Service
-   @POST("/v1/messages")
-   suspend fun generateTips(@Body request: MessageRequest): MessageResponse
+   @POST("ai-study-tip")
+   suspend fun getAiStudyTip(@Body request: AiTipRequest): AiTipResponse
    ```
 
 2. **Quiz Completion Flow**
    ```kotlin
    fun finishQuiz() {
        // Save quiz data to DB
-       // Fetch AI tips if configured
+       // Fetch AI tips from backend
        getAiStudyTips()
    }
    ```
 
-3. **API Key Configuration**
-   ```kotlin
-   private fun isApiKeyConfigured(): Boolean = 
-       BuildConfig.ANTHROPIC_API_KEY.contains("sk-ant-api").not()
-   ```
+3. **Backend Provider**
+   - `AI_PROVIDER=gemini` or `AI_PROVIDER=claude`
+   - `AI_API_KEY` set in backend `.env`
 
 4. **Graceful Fallback**
-   ```kotlin
-   if (isApiKeyConfigured()) {
-       // Use Claude API
-   } else {
-       // Use offline tips
-       showOfflineTips()
-   }
-   ```
+   - If API is unavailable, the app shows curated offline tips.
 
 ### Error Handling
 - Network timeout → Shows offline tips
@@ -520,42 +546,29 @@ AksharaDeepaTutor/
 │   │   ├── java/com/aksharadeepa/tutor/
 │   │   │   ├── data/
 │   │   │   │   ├── local/
-│   │   │   │   │   ├── AppDatabase.kt        (Room database setup)
-│   │   │   │   │   └── PrePopulateCallback   (Data prepopulation)
-│   │   │   │   ├── model/
-│   │   │   │   │   └── Entities.kt           (Room entities)
-│   │   │   │   ├── dao/
-│   │   │   │   │   ├── ChapterDao.kt
-│   │   │   │   │   ├── QuizDao.kt
-│   │   │   │   │   └── GoalDao.kt
-│   │   │   │   ├── repository/
-│   │   │   │   │   ├── ChapterRepository.kt
-│   │   │   │   │   ├── QuizRepository.kt
-│   │   │   │   │   └── GoalRepository.kt
-│   │   │   │   └── network/
-│   │   │   │       ├── AnthropicApiService.kt
-│   │   │   │       └── MessageRequest/Response.kt
+│   │   │   │   │   ├── dao/
+│   │   │   │   │   ├── database/
+│   │   │   │   │   └── entities/
+│   │   │   │   ├── remote/
+│   │   │   │   │   ├── api/
+│   │   │   │   │   └── dto/
+│   │   │   │   └── repository/
+│   │   │   ├── models/
 │   │   │   ├── ui/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── splash/
+│   │   │   │   ├── home/
 │   │   │   │   ├── syllabus/
-│   │   │   │   │   ├── SyllabusTrackerScreen.kt
-│   │   │   │   │   └── SyllabusViewModel.kt
 │   │   │   │   ├── quiz/
-│   │   │   │   │   ├── QuizModeScreen.kt
-│   │   │   │   │   ├── QuizScreen.kt
-│   │   │   │   │   ├── QuizSummaryScreen.kt
-│   │   │   │   │   └── QuizViewModel.kt
+│   │   │   │   ├── progress/
 │   │   │   │   ├── strength/
-│   │   │   │   │   ├── StrengthMapScreen.kt
-│   │   │   │   │   └── StrengthViewModel.kt
+│   │   │   │   ├── profile/
 │   │   │   │   ├── goal/
-│   │   │   │   │   ├── DailyGoalScreen.kt
-│   │   │   │   │   └── GoalViewModel.kt
 │   │   │   │   ├── theme/
-│   │   │   │   │   ├── Color.kt
-│   │   │   │   │   ├── Type.kt
-│   │   │   │   │   └── Theme.kt
 │   │   │   │   └── navigation/
-│   │   │   │       └── NavGraph.kt
+│   │   │   ├── viewmodel/
+│   │   │   ├── utils/
+│   │   │   ├── workers/
 │   │   │   ├── AksharaDeepaTutorApp.kt      (Hilt Application)
 │   │   │   └── MainActivity.kt               (Entry point)
 │   │   └── res/
@@ -566,6 +579,17 @@ AksharaDeepaTutor/
 │   │           └── colors.xml
 │   ├── build.gradle.kts                       (App-level dependencies)
 │   └── AndroidManifest.xml
+├── backend/
+│   ├── app/
+│   │   ├── routes/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   ├── firebase/
+│   │   ├── ai/
+│   │   └── main.py
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── README.md
 ├── gradle/
 │   └── wrapper/
 │       └── gradle-wrapper.properties

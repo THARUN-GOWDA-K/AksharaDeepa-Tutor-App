@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -14,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.aksharadeepa.tutor"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -30,6 +31,7 @@ android {
             properties.load(FileInputStream(localPropertiesFile))
         }
         buildConfigField("String", "ANTHROPIC_API_KEY", "\"${properties.getProperty("ANTHROPIC_API_KEY", "")}\"")
+        buildConfigField("String", "BACKEND_BASE_URL", "\"${properties.getProperty("BACKEND_BASE_URL", "http://10.0.2.2:8000/")}\"")
     }
 
     buildTypes {
@@ -92,6 +94,15 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")

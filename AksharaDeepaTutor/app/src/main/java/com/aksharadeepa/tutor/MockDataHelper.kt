@@ -1,9 +1,9 @@
 package com.aksharadeepa.tutor
 
-import com.aksharadeepa.tutor.data.database.AppDatabase
-import com.aksharadeepa.tutor.data.model.Chapter
-import com.aksharadeepa.tutor.data.model.QuizQuestion
-import com.aksharadeepa.tutor.data.model.StreakData
+import com.aksharadeepa.tutor.data.local.database.AppDatabase
+import com.aksharadeepa.tutor.data.local.entities.Chapter
+import com.aksharadeepa.tutor.data.local.entities.QuizQuestion
+import com.aksharadeepa.tutor.data.local.entities.StreakData
 
 object MockDataHelper {
     suspend fun prepopulateDb(database: AppDatabase) {

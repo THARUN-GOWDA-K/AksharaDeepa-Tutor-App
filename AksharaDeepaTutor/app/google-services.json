@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "248871149444",
+    "project_id": "aksharadeepa-tutor",
+    "storage_bucket": "aksharadeepa-tutor.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248871149444:android:195ddc4e6a1ad5818c87d1",
+        "android_client_info": {
+          "package_name": "com.aksharadeepa.tutor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFh-Ce6OW_2KbFH6KfoscvcdmKUrbAFZk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

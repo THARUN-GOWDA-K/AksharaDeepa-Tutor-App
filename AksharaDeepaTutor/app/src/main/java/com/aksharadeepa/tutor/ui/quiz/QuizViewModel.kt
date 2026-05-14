@@ -1,27 +1,26 @@
 package com.aksharadeepa.tutor.ui.quiz
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aksharadeepa.tutor.BuildConfig
-import com.aksharadeepa.tutor.data.model.*
+import com.aksharadeepa.tutor.data.local.entities.*
+import com.aksharadeepa.tutor.data.repository.AiRepository
 import com.aksharadeepa.tutor.data.repository.ChapterRepository
 import com.aksharadeepa.tutor.data.repository.QuizRepository
-import com.aksharadeepa.tutor.network.AnthropicApiService
-import com.aksharadeepa.tutor.network.AnthropicMessage
-import com.aksharadeepa.tutor.network.AnthropicRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import java.util.Calendar
+import javax.inject.Inject
 import kotlin.random.Random
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
     private val chapterRepository: ChapterRepository,
     private val quizRepository: QuizRepository,
-    private val anthropicApi: AnthropicApiService
+    private val aiRepository: AiRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     val allChapters = chapterRepository.getAllChapters()
@@ -48,24 +47,43 @@ class QuizViewModel @Inject constructor(
     private val _quizState = MutableStateFlow<QuizState>(QuizState.NotStarted)
     val quizState: StateFlow<QuizState> = _quizState
 
-    private val _aiTips = MutableStateFlow<String?>(null)
-    val aiTips: StateFlow<String?> = _aiTips
+    private val _aiTipsUiState = MutableStateFlow<AiTipsUiState>(AiTipsUiState.Idle)
+    val aiTipsUiState: StateFlow<AiTipsUiState> = _aiTipsUiState
 
-    private val _isLoadingAi = MutableStateFlow(false)
-    val isLoadingAi: StateFlow<Boolean> = _isLoadingAi
+    private val _uiEvents = MutableSharedFlow<String>()
+    val uiEvents = _uiEvents.asSharedFlow()
 
-    fun startQuiz(chapter: Chapter) {
-        viewModelScope.launch {
-            _currentChapter.value = chapter
-            val allQuestions = quizRepository.getQuestionsForChapter(chapter.id)
-            val seed = dailySeed(chapter.id)
-            _questions.value = allQuestions.shuffled(Random(seed)).take(5)
-            _currentQuestionIndex.value = 0
-            _userAnswers.value = emptyList()
-            _quizState.value = QuizState.InProgress
-            _aiTips.value = null
-            startTimer()
+    init {
+        val chapterIdArg = savedStateHandle.get<Long?>("chapterId")
+        if (chapterIdArg != null && chapterIdArg <= 0L) {
+            viewModelScope.launch {
+                _uiEvents.emit("Invalid chapter. Please try again.")
+            }
         }
+    }
+
+    suspend fun startQuiz(chapter: Chapter): Boolean {
+        if (chapter.id <= 0L) {
+            _uiEvents.emit("Invalid chapter. Please try again.")
+            return false
+        }
+
+        val allQuestions = quizRepository.getQuestionsForChapter(chapter.id)
+        if (allQuestions.isEmpty()) {
+            _quizState.value = QuizState.NotStarted
+            _uiEvents.emit("No questions available for this chapter yet.")
+            return false
+        }
+
+        _currentChapter.value = chapter
+        val seed = dailySeed(chapter.id)
+        _questions.value = allQuestions.shuffled(Random(seed)).take(5)
+        _currentQuestionIndex.value = 0
+        _userAnswers.value = emptyList()
+        _quizState.value = QuizState.InProgress
+        _aiTipsUiState.value = AiTipsUiState.Idle
+        startTimer()
+        return true
     }
 
     private fun dailySeed(chapterId: Long): Int {
@@ -76,6 +94,7 @@ class QuizViewModel @Inject constructor(
 
     private fun startTimer() {
         viewModelScope.launch {
+            if (_questions.value.isEmpty()) return@launch
             _timer.value = 30
             while (_timer.value > 0 && _quizState.value == QuizState.InProgress) {
                 delay(1000)
@@ -91,7 +110,9 @@ class QuizViewModel @Inject constructor(
 
     fun submitAnswer(selectedOption: String) {
         if (_quizState.value != QuizState.InProgress) return
-        val currentQ = _questions.value[_currentQuestionIndex.value]
+        val questionIndex = _currentQuestionIndex.value
+        if (questionIndex !in _questions.value.indices) return
+        val currentQ = _questions.value[questionIndex]
         val isCorrect = selectedOption == currentQ.correctOption
         
         val newAnswers = _userAnswers.value.toMutableList()
@@ -118,9 +139,11 @@ class QuizViewModel @Inject constructor(
     private fun finishQuiz() {
         _quizState.value = QuizState.Finished
         viewModelScope.launch {
+            val chapter = _currentChapter.value ?: return@launch
+            if (_questions.value.isEmpty()) return@launch
             val score = _userAnswers.value.count { it.isCorrect }
             val attempt = QuizAttempt(
-                chapterId = _currentChapter.value!!.id,
+                chapterId = chapter.id,
                 score = score,
                 totalQuestions = _questions.value.size,
                 attemptedAt = System.currentTimeMillis()
@@ -131,36 +154,36 @@ class QuizViewModel @Inject constructor(
 
     fun getAiStudyTips() {
         val chapter = _currentChapter.value ?: return
+        if (_aiTipsUiState.value is AiTipsUiState.Loading) return
         val wrongAnswers = _userAnswers.value.filter { !it.isCorrect }
         val score = _userAnswers.value.count { it.isCorrect }
         val wrongQuestionsText = wrongAnswers.mapNotNull { ans ->
             _questions.value.find { it.id == ans.questionId }?.questionText
         }.joinToString(", ")
 
-        _isLoadingAi.value = true
         viewModelScope.launch {
-            try {
-                val prompt = "The student scored $score/${_questions.value.size} on the chapter '${chapter.chapterName}' (${chapter.subject}). The questions they got wrong were: $wrongQuestionsText. Give 3 short, friendly, encouraging study tips tailored to these specific weak areas. Keep each tip under 2 sentences."
+            _aiTipsUiState.value = AiTipsUiState.Loading
+            val prompt = "The student scored $score/${_questions.value.size} on the chapter '${chapter.chapterName}' (${chapter.subject}). The questions they got wrong were: $wrongQuestionsText. Give 3 short, friendly, encouraging study tips tailored to these specific weak areas. Keep each tip under 2 sentences."
 
-                val apiKey = BuildConfig.ANTHROPIC_API_KEY.trim()
-                if (apiKey.isEmpty()) {
-                    delay(1000)
-                    _aiTips.value = "Here are some tips based on your performance:\n1. Review the key concepts for this chapter.\n2. Practice more problems on the topics you missed.\n3. Take short breaks to retain information better! You've got this!"
-                } else {
-                    val response = anthropicApi.getCompletion(
-                        apiKey = apiKey,
-                        request = AnthropicRequest(
-                            messages = listOf(AnthropicMessage(role = "user", content = prompt))
-                        )
-                    )
-                    _aiTips.value = response.content.firstOrNull()?.text ?: "No tips available."
+            val result = aiRepository.getAiTips(prompt, topic = chapter.chapterName)
+            _aiTipsUiState.value = result.fold(
+                onSuccess = { tips ->
+                    AiTipsUiState.Success(tips.joinToString("\n") { "• $it" })
+                },
+                onFailure = {
+                    _uiEvents.emit("Using offline tips. Connect to the internet for AI tips.")
+                    AiTipsUiState.Success(offlineTips())
                 }
-            } catch (e: Exception) {
-                _aiTips.value = "Failed to load AI tips. Please check your internet connection."
-            } finally {
-                _isLoadingAi.value = false
-            }
+            )
         }
+    }
+
+    private fun offlineTips(): String {
+        return listOf(
+            "Revise the key concepts before attempting again.",
+            "Write short notes for the questions you missed.",
+            "Practice one weak topic daily for faster recall."
+        ).joinToString("\n") { "• $it" }
     }
 }
 
@@ -169,4 +192,11 @@ sealed class QuizState {
     object InProgress : QuizState()
     data class Answered(val isCorrect: Boolean) : QuizState()
     object Finished : QuizState()
+}
+
+sealed class AiTipsUiState {
+    object Idle : AiTipsUiState()
+    object Loading : AiTipsUiState()
+    data class Success(val tips: String) : AiTipsUiState()
+    data class Error(val message: String) : AiTipsUiState()
 }

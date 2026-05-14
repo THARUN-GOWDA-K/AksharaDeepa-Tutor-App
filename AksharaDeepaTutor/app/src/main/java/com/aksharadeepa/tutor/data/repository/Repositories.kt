@@ -1,10 +1,13 @@
 package com.aksharadeepa.tutor.data.repository
 
-import com.aksharadeepa.tutor.data.database.ChapterDao
-import com.aksharadeepa.tutor.data.database.GoalDao
-import com.aksharadeepa.tutor.data.database.QuizDao
-import com.aksharadeepa.tutor.data.model.*
-import kotlinx.coroutines.flow.Flow
+import com.aksharadeepa.tutor.data.local.dao.ChapterDao
+import com.aksharadeepa.tutor.data.local.dao.GoalDao
+import com.aksharadeepa.tutor.data.local.dao.QuizDao
+import com.aksharadeepa.tutor.data.local.entities.Chapter
+import com.aksharadeepa.tutor.data.local.entities.DailyProgress
+import com.aksharadeepa.tutor.data.local.entities.QuizAttempt
+import com.aksharadeepa.tutor.data.local.entities.UserAnswer
+import com.aksharadeepa.tutor.data.local.entities.StreakData
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,6 +17,7 @@ class ChapterRepository @Inject constructor(
 ) {
     fun getChaptersBySubject(subject: String) = chapterDao.getChaptersBySubject(subject)
     fun getAllChapters() = chapterDao.getAllChapters()
+    fun getChaptersCompletedOnDate(date: String) = chapterDao.getChaptersCompletedOnDate(date)
     suspend fun updateChapter(chapter: Chapter) = chapterDao.updateChapter(chapter)
 }
 

@@ -1,20 +1,40 @@
 package com.aksharadeepa.tutor.ui.syllabus
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aksharadeepa.tutor.ui.theme.*
+import com.aksharadeepa.tutor.ui.theme.GlassBackgroundGradient
+import com.aksharadeepa.tutor.ui.theme.GlassBorder
+import com.aksharadeepa.tutor.ui.theme.GlassCard
+import com.aksharadeepa.tutor.ui.theme.GlassLinearProgress
+import com.aksharadeepa.tutor.ui.theme.GlassPrimaryButton
+import com.aksharadeepa.tutor.ui.theme.GlassSurfaceStrong
+import com.aksharadeepa.tutor.ui.theme.TextMuted
+import com.aksharadeepa.tutor.ui.theme.TextPrimary
+import com.aksharadeepa.tutor.ui.theme.TextSecondary
+import com.aksharadeepa.tutor.ui.theme.subjectAccent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,19 +45,18 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
     val allAttempts by viewModel.allAttempts.collectAsState()
 
     val subjects = listOf("SCIENCE", "MATH", "SOCIAL")
-    val headerBrush = Brush.verticalGradient(listOf(SoftSage, SageMist))
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(headerBrush)
+            .background(GlassBackgroundGradient)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Syllabus Tracker", style = MaterialTheme.typography.displayLarge)
+            Text("Syllabus Tracker", style = MaterialTheme.typography.displayLarge, color = TextPrimary)
             Text(
                 "Track chapter completion and keep your progress visible.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextGray
+                color = TextSecondary
             )
         }
 
@@ -45,23 +64,22 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
         val totalCount = allChapters.size
         val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
-        Card(
+        GlassCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
+                .padding(horizontal = 16.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Overall Progress", style = MaterialTheme.typography.titleMedium)
+                    Text("Overall Progress", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("${(progress * 100).toInt()}%", style = MaterialTheme.typography.titleMedium)
+                    Text("${(progress * 100).toInt()}%", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
                 }
-                LinearProgressIndicator(
+                GlassLinearProgress(
                     progress = progress,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    color = SuccessGreen,
-                    trackColor = BorderSoft
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
                 )
             }
         }
@@ -76,10 +94,21 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
                 FilterChip(
                     selected = selectedSubject == subject,
                     onClick = { viewModel.selectSubject(subject) },
-                    label = { Text(displaySubject(subject)) },
+                    label = {
+                        Text(
+                            displaySubject(subject),
+                            color = if (selectedSubject == subject) TextPrimary else TextMuted
+                        )
+                    },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = subjectAccent(subject),
-                        selectedLabelColor = SurfaceWhite
+                        selectedContainerColor = GlassSurfaceStrong,
+                        selectedLabelColor = TextPrimary,
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                        labelColor = TextMuted
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = GlassBorder,
+                        selectedBorderColor = GlassBorder
                     )
                 )
             }
@@ -87,17 +116,17 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
 
         val subjectChapters = chapters
         val subjectCompleted = subjectChapters.count { it.isCompleted }
-        val subjectProgress = if (subjectChapters.isNotEmpty()) subjectCompleted.toFloat() / subjectChapters.size else 0f
-        val subjectColor = subjectAccent(selectedSubject)
+        val subjectProgress = if (subjectChapters.isNotEmpty()) {
+            subjectCompleted.toFloat() / subjectChapters.size
+        } else {
+            0f
+        }
 
-        LinearProgressIndicator(
+        GlassLinearProgress(
             progress = subjectProgress,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(5.dp)
-                .padding(horizontal = 16.dp),
-            color = subjectColor,
-            trackColor = BorderSoft
+                .padding(horizontal = 16.dp)
         )
 
         LazyColumn(
@@ -108,13 +137,13 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
         ) {
             items(subjectChapters) { chapter ->
                 val attempt = allAttempts.filter { it.chapterId == chapter.id }.maxByOrNull { it.attemptedAt }
-                val scoreText = if (attempt != null) "${(attempt.score * 100) / attempt.totalQuestions}%" else "Not attempted"
+                val scoreText = if (attempt != null) {
+                    "${(attempt.score * 100) / attempt.totalQuestions}%"
+                } else {
+                    "Not attempted"
+                }
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -125,7 +154,8 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
                                 Text(
                                     chapter.chapterName,
                                     style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = TextPrimary
                                 )
                                 Text(
                                     displaySubject(chapter.subject),
@@ -133,28 +163,30 @@ fun SyllabusTrackerScreen(viewModel: SyllabusViewModel = hiltViewModel()) {
                                     color = subjectAccent(chapter.subject)
                                 )
                             }
-                            Badge(containerColor = subjectAccent(chapter.subject)) {
-                                Text(scoreText, color = SurfaceWhite, modifier = Modifier.padding(6.dp))
-                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                scoreText,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = TextSecondary
+                            )
                         }
 
                         if (chapter.importantConcepts.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Key Concepts", style = MaterialTheme.typography.labelLarge, color = TextGray)
-                            Text(chapter.importantConcepts, style = MaterialTheme.typography.bodyMedium)
+                            Text("Key Concepts", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+                            Text(chapter.importantConcepts, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Button(
+                        GlassPrimaryButton(
                             onClick = { viewModel.toggleChapterCompletion(chapter, !chapter.isCompleted) },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (chapter.isCompleted) BorderSoft else subjectAccent(chapter.subject),
-                                contentColor = if (chapter.isCompleted) InkLight else SurfaceWhite
-                            )
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(if (chapter.isCompleted) "Completed" else "Mark as Complete")
+                            Text(
+                                if (chapter.isCompleted) "Completed" else "Mark as Complete",
+                                color = TextPrimary
+                            )
                         }
                     }
                 }

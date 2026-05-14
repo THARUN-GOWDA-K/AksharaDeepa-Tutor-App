@@ -1,8 +1,9 @@
-package com.aksharadeepa.tutor.data.model
+package com.aksharadeepa.tutor.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
 
 enum class Subject {
     SCIENCE, MATH, SOCIAL
@@ -15,6 +16,7 @@ data class Chapter(
     val chapterName: String,
     val importantConcepts: String = "",
     val isCompleted: Boolean = false,
+    @ColumnInfo(name = "completion_date") val completionDate: String? = null,
     val orderIndex: Int
 )
 

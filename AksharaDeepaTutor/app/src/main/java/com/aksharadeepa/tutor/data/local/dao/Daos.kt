@@ -1,7 +1,16 @@
-package com.aksharadeepa.tutor.data.database
+package com.aksharadeepa.tutor.data.local.dao
 
-import androidx.room.*
-import com.aksharadeepa.tutor.data.model.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.aksharadeepa.tutor.data.local.entities.Chapter
+import com.aksharadeepa.tutor.data.local.entities.DailyProgress
+import com.aksharadeepa.tutor.data.local.entities.QuizAttempt
+import com.aksharadeepa.tutor.data.local.entities.QuizQuestion
+import com.aksharadeepa.tutor.data.local.entities.StreakData
+import com.aksharadeepa.tutor.data.local.entities.UserAnswer
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -11,6 +20,9 @@ interface ChapterDao {
 
     @Query("SELECT * FROM chapters")
     fun getAllChapters(): Flow<List<Chapter>>
+
+    @Query("SELECT * FROM chapters WHERE isCompleted = 1 AND completion_date = :date")
+    fun getChaptersCompletedOnDate(date: String): Flow<List<Chapter>>
 
     @Update
     suspend fun updateChapter(chapter: Chapter)
