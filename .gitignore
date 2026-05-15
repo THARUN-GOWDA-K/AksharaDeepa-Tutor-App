@@ -9,6 +9,9 @@
 **/.cxx
 **/*.apk
 **/*.aar
+**/google-services.json
+**/*.keystore
+**/*.jks
 
 # Python / Backend
 **/.venv/
