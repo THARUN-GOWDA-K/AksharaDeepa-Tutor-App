@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_logo_modern_1778823006756.png" width="150" height="150" />
+<img src="C:\Users\tharu\OneDrive\Desktop\App Logo.png" width="150" height="150" />
 
 # 🌟 Akshara Deepa Tutor 🌟
 ### *Lighting the Path to Academic Excellence for SSLC Students*
