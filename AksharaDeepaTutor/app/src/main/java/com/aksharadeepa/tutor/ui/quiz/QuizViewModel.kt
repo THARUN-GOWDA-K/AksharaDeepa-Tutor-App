@@ -5,8 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aksharadeepa.tutor.data.local.entities.*
 import com.aksharadeepa.tutor.data.repository.AiRepository
+import com.aksharadeepa.tutor.data.repository.AuthRepository
 import com.aksharadeepa.tutor.data.repository.ChapterRepository
 import com.aksharadeepa.tutor.data.repository.QuizRepository
+import com.aksharadeepa.tutor.data.repository.QuizRemoteRepository
+import com.aksharadeepa.tutor.data.remote.dto.QuizAnswerDto
+import com.aksharadeepa.tutor.data.remote.dto.QuizSubmitRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -20,6 +24,8 @@ class QuizViewModel @Inject constructor(
     private val chapterRepository: ChapterRepository,
     private val quizRepository: QuizRepository,
     private val aiRepository: AiRepository,
+    private val authRepository: AuthRepository,
+    private val quizRemoteRepository: QuizRemoteRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -149,6 +155,25 @@ class QuizViewModel @Inject constructor(
                 attemptedAt = System.currentTimeMillis()
             )
             quizRepository.saveQuizAttempt(attempt, _userAnswers.value)
+            val userId = authRepository.currentUserId()
+            if (userId != null) {
+                val answers = _userAnswers.value.map { answer ->
+                    QuizAnswerDto(
+                        questionId = answer.questionId.toString(),
+                        selectedOption = answer.selectedOption,
+                        isCorrect = answer.isCorrect
+                    )
+                }
+                val request = QuizSubmitRequest(
+                    userId = userId,
+                    chapterId = chapter.id.toString(),
+                    score = score,
+                    totalQuestions = _questions.value.size,
+                    answers = answers,
+                    attemptedAt = attempt.attemptedAt
+                )
+                quizRemoteRepository.submitQuiz(request)
+            }
         }
     }
 
@@ -167,23 +192,44 @@ class QuizViewModel @Inject constructor(
 
             val result = aiRepository.getAiTips(prompt, topic = chapter.chapterName)
             _aiTipsUiState.value = result.fold(
-                onSuccess = { tips ->
-                    AiTipsUiState.Success(tips.joinToString("\n") { "• $it" })
+                onSuccess = { response ->
+                    val tipsText = if (response.fallback) {
+                        buildOfflineTips(score, _questions.value.size, wrongQuestionsText, chapter.chapterName)
+                    } else {
+                        formatTips(response.tips)
+                    }
+                    AiTipsUiState.Success(tipsText)
                 },
                 onFailure = {
                     _uiEvents.emit("Using offline tips. Connect to the internet for AI tips.")
-                    AiTipsUiState.Success(offlineTips())
+                    AiTipsUiState.Success(buildOfflineTips(score, _questions.value.size, wrongQuestionsText, chapter.chapterName))
                 }
             )
         }
     }
 
-    private fun offlineTips(): String {
-        return listOf(
-            "Revise the key concepts before attempting again.",
-            "Write short notes for the questions you missed.",
-            "Practice one weak topic daily for faster recall."
-        ).joinToString("\n") { "• $it" }
+    private fun formatTips(tips: List<String>): String {
+        return tips.joinToString("\n") { "• $it" }
+    }
+
+    private fun buildOfflineTips(score: Int, total: Int, wrongQuestionsText: String, chapterName: String): String {
+        val accuracy = if (total > 0) (score * 100 / total) else 0
+        val focusText = if (wrongQuestionsText.isNotBlank()) {
+            val preview = if (wrongQuestionsText.length > 120) {
+                wrongQuestionsText.take(120) + "..."
+            } else {
+                wrongQuestionsText
+            }
+            "Revisit the missed questions: $preview."
+        } else {
+            "Revisit the tricky parts of $chapterName and write a short summary."
+        }
+        val tips = listOf(
+            "Accuracy: $accuracy%. Review $chapterName for 15 minutes, then try similar problems.",
+            focusText,
+            "Practice 5 new questions and explain each answer in your own words."
+        )
+        return formatTips(tips)
     }
 }
 

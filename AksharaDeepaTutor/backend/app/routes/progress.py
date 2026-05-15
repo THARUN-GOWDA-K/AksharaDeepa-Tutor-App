@@ -16,12 +16,16 @@ async def get_progress(user_id: str, subject: str) -> ProgressResponse:
         db = get_firestore_client()
         doc = db.collection("users").document(user_id).collection("progress").document(subject).get()
         data = doc.to_dict() or {}
+        completed_ids = data.get("completed_chapter_ids", []) or []
+        completion_dates = data.get("completion_dates", {}) or {}
         return ProgressResponse(
             user_id=user_id,
             subject=subject,
             completed_chapters=int(data.get("completed_chapters", 0)),
             total_chapters=int(data.get("total_chapters", 0)),
-            updated_at=int(data.get("updated_at", 0))
+            updated_at=int(data.get("updated_at", 0)),
+            completed_chapter_ids=[int(item) for item in completed_ids],
+            completion_dates={str(key): str(value) for key, value in completion_dates.items()}
         )
 
     return await asyncio.to_thread(_fetch)

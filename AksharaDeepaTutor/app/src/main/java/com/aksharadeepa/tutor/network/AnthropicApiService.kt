@@ -12,7 +12,7 @@ data class AnthropicMessage(
 
 data class AnthropicRequest(
     val model: String = "claude-3-haiku-20240307",
-    val max_tokens: Int = 1024,
+    val maxTokens: Int = 1024,
     val messages: List<AnthropicMessage>
 )
 

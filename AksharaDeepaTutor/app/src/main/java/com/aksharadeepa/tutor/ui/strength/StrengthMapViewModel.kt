@@ -67,15 +67,36 @@ class StrengthMapViewModel @Inject constructor(
 
             val result = aiRepository.getAiTips(prompt, topic = "Strength Map")
             _aiResponse.value = result.fold(
-                onSuccess = { tips -> tips.joinToString("\n") },
-                onFailure = { offlineCoachTips() }
+                onSuccess = { response ->
+                    if (response.fallback) {
+                        buildOfflineCoachTips(question, weakChapters, strongChapters)
+                    } else {
+                        response.tips.joinToString("\n")
+                    }
+                },
+                onFailure = { buildOfflineCoachTips(question, weakChapters, strongChapters) }
             )
             _isLoadingAi.value = false
         }
     }
 
-    private fun offlineCoachTips(): String {
-        return "Focus on your weakest chapters first. Break each topic into 15-minute blocks and quiz yourself after each block."
+    private fun buildOfflineCoachTips(question: String, weakChapters: String, strongChapters: String): String {
+        val weakTip = if (weakChapters != "None") {
+            "Focus first on: $weakChapters."
+        } else {
+            "Pick one topic you find hardest and start there."
+        }
+        val strongTip = if (strongChapters != "None") {
+            "Use $strongChapters to build confidence, then switch back to weak areas."
+        } else {
+            "After practice, quiz yourself to confirm improvement."
+        }
+        return listOf(
+            "Plan two short sessions (15-20 min) and end with a 5-question quiz.",
+            weakTip,
+            strongTip,
+            "Question: $question"
+        ).joinToString("\n")
     }
 
     private fun buildSubjectStrength(
@@ -118,7 +139,8 @@ class StrengthMapViewModel @Inject constructor(
     private fun findWeakChapters(chapters: List<Chapter>, attempts: List<QuizAttempt>): String {
         val weak = chapters.filter { ch ->
             val lastAtt = attempts.filter { it.chapterId == ch.id }.maxByOrNull { it.attemptedAt }
-            lastAtt != null && (lastAtt.score * 100 / lastAtt.totalQuestions) < 60
+            lastAtt != null && lastAtt.totalQuestions > 0 &&
+                (lastAtt.score * 100 / lastAtt.totalQuestions) < 60
         }
         return weak.joinToString { it.chapterName }.ifEmpty { "None" }
     }
@@ -126,7 +148,8 @@ class StrengthMapViewModel @Inject constructor(
     private fun findStrongChapters(chapters: List<Chapter>, attempts: List<QuizAttempt>): String {
         val strong = chapters.filter { ch ->
             val lastAtt = attempts.filter { it.chapterId == ch.id }.maxByOrNull { it.attemptedAt }
-            lastAtt != null && (lastAtt.score * 100 / lastAtt.totalQuestions) >= 80
+            lastAtt != null && lastAtt.totalQuestions > 0 &&
+                (lastAtt.score * 100 / lastAtt.totalQuestions) >= 80
         }
         return strong.joinToString { it.chapterName }.ifEmpty { "None" }
     }
@@ -135,7 +158,10 @@ class StrengthMapViewModel @Inject constructor(
 data class StrengthUiState(
     val subjects: List<SubjectStrength>
 ) {
-    val performanceScores: List<Float> = subjects.map { it.quizPercent / 100f }
+    val performanceScores: List<Float> = subjects.map {
+        val score = if (it.hasAttempts) it.quizPercent else it.completionPercent
+        score / 100f
+    }
 
     companion object {
         fun empty(): StrengthUiState = StrengthUiState(

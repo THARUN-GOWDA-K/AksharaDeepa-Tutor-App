@@ -8,8 +8,13 @@ import com.aksharadeepa.tutor.data.local.entities.DailyProgress
 import com.aksharadeepa.tutor.data.local.entities.QuizAttempt
 import com.aksharadeepa.tutor.data.local.entities.UserAnswer
 import com.aksharadeepa.tutor.data.local.entities.StreakData
+import com.aksharadeepa.tutor.data.remote.api.TutorApiService
+import com.aksharadeepa.tutor.data.remote.dto.QuizHistoryResponse
+import com.aksharadeepa.tutor.data.remote.dto.QuizSubmitRequest
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
+import android.util.Log
 
 @Singleton
 class ChapterRepository @Inject constructor(
@@ -42,4 +47,87 @@ class GoalRepository @Inject constructor(
     suspend fun updateDailyProgress(progress: DailyProgress) = goalDao.insertOrUpdateDailyProgress(progress)
     fun getStreakData() = goalDao.getStreakData()
     suspend fun updateStreakData(streakData: StreakData) = goalDao.updateStreakData(streakData)
+}
+
+@Singleton
+class LocalDataRepository @Inject constructor(
+    private val chapterDao: ChapterDao,
+    private val quizDao: QuizDao,
+    private val goalDao: GoalDao
+) {
+    suspend fun clearUserData() {
+        quizDao.clearUserAnswers()
+        quizDao.clearQuizAttempts()
+        chapterDao.resetChapterCompletion()
+        goalDao.clearDailyProgress()
+        goalDao.clearStreakData()
+    }
+}
+
+@Singleton
+class QuizRemoteRepository @Inject constructor(
+    private val apiService: TutorApiService
+) {
+    suspend fun submitQuiz(request: QuizSubmitRequest): Result<Unit> {
+        return runCatching { apiService.submitQuiz(request) }
+    }
+
+    suspend fun getQuizHistory(userId: String): Result<QuizHistoryResponse> {
+        return runCatching { apiService.getQuizHistory(userId) }
+    }
+}
+
+@Singleton
+class UserSyncRepository @Inject constructor(
+    private val apiService: TutorApiService,
+    private val chapterDao: ChapterDao,
+    private val quizDao: QuizDao,
+    private val goalDao: GoalDao
+) {
+    suspend fun syncFromBackend(userId: String) {
+        quizDao.clearUserAnswers()
+        quizDao.clearQuizAttempts()
+        chapterDao.resetChapterCompletion()
+
+        val subjects = listOf("SCIENCE", "MATH", "SOCIAL")
+        val completedIds = mutableSetOf<Long>()
+        val completionDates = mutableMapOf<String, String>()
+
+        subjects.forEach { subject ->
+            runCatching { apiService.getProgress(userId, subject) }
+                .onFailure { Log.e("UserSync", "Error fetching progress for $subject", it) }
+                .getOrNull()?.let { progress ->
+                completedIds.addAll(progress.completedChapterIds)
+                completionDates.putAll(progress.completionDates)
+            }
+        }
+
+        val chapters = runCatching { chapterDao.getAllChapters().first() }.getOrNull().orEmpty()
+        chapters.forEach { chapter ->
+            val isCompleted = completedIds.contains(chapter.id)
+            val completionDate = completionDates[chapter.id.toString()]
+            if (chapter.isCompleted != isCompleted || chapter.completionDate != completionDate) {
+                chapterDao.updateChapter(
+                    chapter.copy(isCompleted = isCompleted, completionDate = completionDate)
+                )
+            }
+        }
+
+        runCatching { apiService.getQuizHistory(userId) }
+            .onFailure { Log.e("UserSync", "Error fetching quiz history", it) }
+            .getOrNull()?.let { history ->
+            val attempts = history.items.mapNotNull { item ->
+                val chapterId = item.chapterId.toLongOrNull() ?: return@mapNotNull null
+                QuizAttempt(
+                    chapterId = chapterId,
+                    score = item.score,
+                    totalQuestions = item.totalQuestions,
+                    attemptedAt = item.attemptedAt
+                )
+            }
+            if (attempts.isNotEmpty()) {
+                quizDao.insertAttempts(attempts)
+            }
+        }
+    }
 }

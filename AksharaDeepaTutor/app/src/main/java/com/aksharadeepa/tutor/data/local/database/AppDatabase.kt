@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
         DailyProgress::class,
         StreakData::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -49,6 +49,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "aksharadeepa_database"
                 )
                     .addMigrations(MIGRATION_6_7)
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
 

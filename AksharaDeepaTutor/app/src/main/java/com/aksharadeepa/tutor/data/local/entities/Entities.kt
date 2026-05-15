@@ -29,7 +29,8 @@ data class Chapter(
             childColumns = ["chapterId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [androidx.room.Index("chapterId")]
 )
 data class QuizQuestion(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -52,7 +53,8 @@ data class QuizQuestion(
             childColumns = ["chapterId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [androidx.room.Index("chapterId")]
 )
 data class QuizAttempt(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -77,6 +79,10 @@ data class QuizAttempt(
             childColumns = ["questionId"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        androidx.room.Index("attemptId"),
+        androidx.room.Index("questionId")
     ]
 )
 data class UserAnswer(

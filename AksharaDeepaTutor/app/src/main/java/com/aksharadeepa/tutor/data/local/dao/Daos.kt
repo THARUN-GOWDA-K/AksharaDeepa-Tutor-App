@@ -24,6 +24,9 @@ interface ChapterDao {
     @Query("SELECT * FROM chapters WHERE isCompleted = 1 AND completion_date = :date")
     fun getChaptersCompletedOnDate(date: String): Flow<List<Chapter>>
 
+    @Query("UPDATE chapters SET isCompleted = 0, completion_date = NULL")
+    suspend fun resetChapterCompletion()
+
     @Update
     suspend fun updateChapter(chapter: Chapter)
 
@@ -46,7 +49,16 @@ interface QuizDao {
     suspend fun insertAttempt(attempt: QuizAttempt): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttempts(attempts: List<QuizAttempt>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserAnswers(answers: List<UserAnswer>)
+
+    @Query("DELETE FROM user_answers")
+    suspend fun clearUserAnswers()
+
+    @Query("DELETE FROM quiz_attempts")
+    suspend fun clearQuizAttempts()
 
     @Query("SELECT * FROM quiz_attempts WHERE chapterId = :chapterId ORDER BY attemptedAt DESC LIMIT 1")
     fun getLastAttemptForChapter(chapterId: Long): Flow<QuizAttempt?>
@@ -68,4 +80,10 @@ interface GoalDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateStreakData(streakData: StreakData)
+
+    @Query("DELETE FROM daily_progress")
+    suspend fun clearDailyProgress()
+
+    @Query("DELETE FROM streak_data")
+    suspend fun clearStreakData()
 }

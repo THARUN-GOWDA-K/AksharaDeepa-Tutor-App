@@ -99,13 +99,23 @@ fun StrengthMapScreen(viewModel: StrengthMapViewModel = hiltViewModel()) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-
-            RadarChart(
-                performanceScores = uiState.performanceScores,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-            )
+            val hasAnyData = uiState.subjects.any { it.hasAttempts || it.completionPercent > 0 }
+            if (hasAnyData) {
+                RadarChart(
+                    performanceScores = uiState.performanceScores,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                )
+            } else {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("No analytics yet", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text("Take a quiz or mark chapters complete to build your strength map.", color = TextSecondary)
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -182,7 +192,7 @@ fun StrengthMapScreen(viewModel: StrengthMapViewModel = hiltViewModel()) {
                             subjectChapters.forEach { chapter ->
                                 val lastAtt = attempts.filter { it.chapterId == chapter.id }
                                     .maxByOrNull { it.attemptedAt }
-                                val pct = if (lastAtt != null) {
+                                val pct = if (lastAtt != null && lastAtt.totalQuestions > 0) {
                                     (lastAtt.score * 100) / lastAtt.totalQuestions
                                 } else {
                                     -1
@@ -284,7 +294,8 @@ private fun RadarChart(
     Box(modifier = modifier) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2, size.height / 2)
-            val radius = min(size.width, size.height) / 2
+            val textPadding = 40.dp.toPx()
+            val radius = (min(size.width, size.height) / 2) - textPadding
 
             val gridColor = TextPrimary.copy(alpha = 0.15f)
             val levels = 4

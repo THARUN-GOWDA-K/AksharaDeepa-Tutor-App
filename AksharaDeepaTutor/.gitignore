@@ -1,0 +1,33 @@
+# Android
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild
+.cxx
+.apple_flavour
+*.apk
+*.aar
+
+# Kotlin/JVM
+*.class
+bin/
+
+# Python / Backend
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+firebase-credentials.json*
+backend/app/firebase-credentials.json*
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+hs_err_pid*

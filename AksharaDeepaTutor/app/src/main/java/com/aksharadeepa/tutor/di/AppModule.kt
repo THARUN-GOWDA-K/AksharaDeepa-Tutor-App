@@ -18,6 +18,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+import com.google.gson.FieldNamingPolicy
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -51,22 +54,30 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAnthropicApi(client: OkHttpClient): AnthropicApiService {
+    fun provideGson(): Gson {
+        return GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAnthropicApi(client: OkHttpClient, gson: Gson): AnthropicApiService {
         return Retrofit.Builder()
             .baseUrl("https://api.anthropic.com/")
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(AnthropicApiService::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideBackendApi(client: OkHttpClient): TutorApiService {
+    fun provideBackendApi(client: OkHttpClient, gson: Gson): TutorApiService {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BACKEND_BASE_URL)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(TutorApiService::class.java)
     }

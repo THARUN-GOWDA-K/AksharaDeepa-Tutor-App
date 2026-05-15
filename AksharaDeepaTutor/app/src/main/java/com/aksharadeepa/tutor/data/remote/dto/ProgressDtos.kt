@@ -5,7 +5,9 @@ data class ProgressUpdateRequest(
     val subject: String,
     val completedChapters: Int,
     val totalChapters: Int,
-    val updatedAt: Long
+    val updatedAt: Long,
+    val completedChapterIds: List<Long> = emptyList(),
+    val completionDates: Map<String, String> = emptyMap()
 )
 
 data class ProgressResponse(
@@ -13,5 +15,7 @@ data class ProgressResponse(
     val subject: String,
     val completedChapters: Int,
     val totalChapters: Int,
-    val updatedAt: Long
+    val updatedAt: Long,
+    val completedChapterIds: List<Long> = emptyList(),
+    val completionDates: Map<String, String> = emptyMap()
 )
