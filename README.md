@@ -1,242 +1,115 @@
-# AksharaDeepaTutor
+# Akshara Deepa Tutor 🎓
+> **Empowering 10th Grade SSLC Students with AI-Driven Personalized Learning**
 
-A modern, fully-featured educational mobile app for 10th-grade SSLC (Secondary School Leaving Certificate) students in India. Built with Kotlin, Jetpack Compose, and AI-powered study tips using Claude.
+![Project Banner](file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_mockup_1778821079644.png)
 
-## ✨ Features
+## 🌟 Overview
+**Akshara Deepa Tutor** is a premium, offline-first educational platform designed specifically for 10th-grade SSLC students in rural India. By combining the power of **Jetpack Compose**, **Room Database**, and **Generative AI (Gemini/Claude)**, the app provides a seamless study companion that tracks progress, gamifies learning through quizzes, and offers personalized coaching.
 
-### 📚 Syllabus Tracker
-- Browse chapters organized by subject (Science, Math, Social Studies)
-- Track completion progress with visual indicators
-- View overall and per-subject progress bars
-- Mark chapters as complete and track learning journey
+---
 
-### 🎯 Interactive Quizzes
-- **5-question daily quizzes** per chapter with deterministic randomization
-- **30-second timer** per question for timed practice
-- Real-time feedback with correct/incorrect highlighting
-- Detailed answer explanations
-- Score calculation and progress tracking
-- Quiz history and attempt logging
+## ✨ Key Features
 
-### 🧠 AI Study Tips
-- **Claude 3 Haiku** integration for personalized study recommendations
-- AI-generated tips after quiz completion
-- Graceful offline fallback when API is unavailable
-- AI Coach in Strength Map for performance analysis
+### 📚 Syllabus & Progress Tracking
+Stay on top of your studies with a comprehensive tracker covering Science, Math, and Social Studies.
+- **45+ Detailed Chapters**: Organized by subject with core concepts.
+- **Visual Progress**: Real-time progress bars for each subject.
+- **Smart Checkmarks**: Instantly mark concepts as "Learned" or "To-Do".
 
-### 📊 Strength Map
-- Triangular radar chart visualizing subject performance
-- Color-coded performance badges (Strong/Developing/Needs Work)
-- Per-chapter performance metrics
-- Subject-wise statistics and trends
+### 🎯 Intelligent Quiz System
+Test your knowledge with timed, subject-specific quizzes.
+- **30-Second Sprints**: Quick-fire questions to build exam speed.
+- **Instant Feedback**: Learn from your mistakes immediately with detailed explanations.
+- **Deterministic Randomization**: Fresh questions every day to keep things interesting.
+
+### 📊 Performance Analytics (Strength Map)
+Visualize your academic growth with high-end data visualization.
+- **Radar Charts**: See your strengths and weaknesses across subjects at a glance.
+- **AI Coach Integration**: Get personalized study tips based on your quiz performance.
+- **Leveling System**: Earn badges as you master different topics.
+
+![Analytics View](file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_analytics_1778821101226.png)
 
 ### 🔥 Daily Goals & Streaks
-- Set daily learning targets (1-10 questions)
-- Track completion with circular progress ring
-- Maintain learning streaks
-- Personalized topic recommendations
+Build a consistent study habit with gamified goal tracking.
+- **Custom Goals**: Set how many questions you want to solve daily.
+- **Streak Tracking**: Don't break the chain! Visualize your consistency.
+- **Topic Recommendations**: The app suggests what to study next based on your weak points.
 
-## 🛠️ Tech Stack
+---
 
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose + Material 3
-- **Architecture**: MVVM (Model-View-ViewModel)
-- **Database**: Room Database (SQLite)
-- **Dependency Injection**: Hilt
-- **Networking**: Retrofit + OkHttp
-- **AI API**: Anthropic Claude 3 Haiku
-- **Navigation**: Jetpack Navigation Compose
-- **Async**: Coroutines + Flow
-- **Build System**: Gradle 8.10
+## 🛠️ Technology Stack
 
-## 🎨 Design System
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | Kotlin & Jetpack Compose | Modern, declarative UI with premium aesthetics. |
+| **Local Database** | Room (SQLite) | Offline-first persistence for all user data. |
+| **Cloud Sync** | FastAPI (Python) | High-performance backend bridge for synchronization. |
+| **Database (Cloud)** | Firebase Firestore | Real-time data sync across devices. |
+| **Authentication** | Firebase Auth | Secure email/password login and signup. |
+| **AI Engine** | Gemini / Claude | Personalized study tips and performance coaching. |
+| **Architecture** | MVVM + Repository | Scalable, maintainable, and testable codebase. |
 
-### Colors
-- **Primary**: Deep Olive (#1A2517)
-- **Secondary**: Soft Sage (#ACC8A2)
-- **Subject Accents**:
-  - Science: Cyan (#00BCD4)
-  - Math: Purple (#9C27B0)
-  - Social: Orange (#FF9800)
-- **Semantic**: Green (#4CAF50), Red (#F44336), Yellow (#FFC107)
+---
 
-### Typography
-- Display: 24sp Bold
-- Headline: 20sp SemiBold
-- Body: 14sp Regular
-- Label: 12sp Medium
+## 🏗️ System Architecture
 
-## 📱 Architecture
+```mermaid
+graph TD
+    A[Mobile App - Jetpack Compose] --> B[ViewModel Layer]
+    B --> C[Repository Layer]
+    C --> D[(Room Local DB)]
+    C --> E[FastAPI Backend]
+    E --> F[Firebase Firestore]
+    E --> G[Firebase Auth]
+    E --> H[AI Models - Gemini/Claude]
+```
 
-### Layered Architecture
-┌─────────────────────────────────────────┐
-│ Presentation Layer │
-│ (Jetpack Compose UI Screens) │
-├─────────────────────────────────────────┤
-│ ViewModel Layer │
-│ (State Management & Business Logic) │
-├─────────────────────────────────────────┤
-│ Repository Layer │
-│ (Data Abstraction & Coordination) │
-├─────────────────────────────────────────┤
-│ Data Layer │
-│ (Room Database + Retrofit API) │
-└─────────────────────────────────────────┘
-
-
-### Database Schema
-
-**Chapter**
-- `id`: Int (Primary Key)
-- `subject`: String (SCIENCE, MATH, SOCIAL)
-- `title`: String
-- `description`: String
-- `isCompleted`: Boolean
-- `completedAt`: Long (milliseconds)
-
-**QuizQuestion**
-- `id`: Int (Primary Key)
-- `chapterId`: Int (Foreign Key)
-- `questionText`: String
-- `optionA/B/C/D`: String
-- `correctOption`: String
-- `explanation`: String
-
-**QuizAttempt**
-- `id`: Int (Primary Key)
-- `chapterId`: Int (Foreign Key)
-- `score`: Int
-- `totalQuestions`: Int
-- `attemptedAt`: Long
-
-**UserAnswer**
-- `id`: Int (Primary Key)
-- `attemptId`: Int (Foreign Key)
-- `questionId`: Int (Foreign Key)
-- `selectedOption`: String
-
-**DailyProgress**
-- `userId`: String
-- `date`: Long
-- `questionsAttempted`: Int
-- `goalsCompleted`: Int
-
-**StreakData**
-- `userId`: String
-- `currentStreak`: Int
-- `lastUpdated`: Long
-
-### Key Classes
-
-- **SyllabusViewModel**: Manages chapter list and completion status
-- **QuizViewModel**: Handles quiz state, timer, scoring, and AI tips
-- **StrengthViewModel**: Calculates subject performance and provides AI coaching
-- **GoalViewModel**: Tracks daily progress and streaks
-- **ChapterRepository**: Data access for chapters
-- **QuizRepository**: Data access for questions and attempts
-- **GoalRepository**: Data access for daily progress
-- **AnthropicApiService**: Retrofit service for Claude API
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+- **Android Studio** (Koala or newer)
+- **Python 3.10+**
+- **Firebase Account** (for authentication and firestore)
 
-- Android Studio (latest)
-- Android SDK API 34 (minimum API 21)
-- Java 17 or higher
-- Kotlin 1.9+
-
-### Installation
-
-1. **Clone the repository**
+### 1. Backend Setup
+1. Navigate to the backend directory:
    ```bash
-   git clone https://github.com/THARUN-GOWDA-K/Tutor-App.git
-   cd Tutor-App/AksharaDeepaTutor
+   cd backend
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   .\.venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Set up your `.env` file with your **Firebase Service Account Key** and **AI API Keys**.
+5. Run the server:
+   ```bash
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
 
+### 2. Android App Setup
+1. Open the `AksharaDeepaTutor` project in Android Studio.
+2. Add your `google-services.json` file to the `app/` directory.
+3. Sync Gradle and run the app on an emulator (use `10.0.2.2` to connect to the local backend).
 
-Configure API Key (Optional - for AI features)
+---
 
-Create or update local.properties in the project root:
-Without the key: The app will gracefully fall back to offline tips
-Obtain a key from Anthropic Console
-Build the project
+## 🛡️ Troubleshooting
 
-Run on emulator or device
+### Data Persistence Issues
+- **Backend Running?**: Ensure your FastAPI server is active in the background.
+- **Firebase Config**: Verify that you have created a **Firestore Database** in the Firebase Console.
+- **Local Network**: Ensure `android:usesCleartextTraffic="true"` is enabled in the Manifest for local testing.
 
-Or use Android Studio's "Run" button
-First Launch
-App automatically prepopulates database with 225 sample questions
-Data is organized into 45 chapters (15 per subject)
-Quiz randomization is deterministic daily (same 5 questions per chapter each day)
-📖 Usage
-Taking a Quiz
-Navigate to Quiz Mode tab
-Select a subject (Science, Math, or Social)
-Choose a chapter
-Answer 5 questions within 30 seconds each
-Review your score and get AI-powered study tips
-Tracking Progress
-View Syllabus tab to see all chapters and completion status
-Check Strength Map to visualize your performance radar
-Review subject-wise statistics and color-coded performance
-Setting Daily Goals
-Go to Daily Goal tab
-Adjust your target (1-10 questions)
-See recommended chapters to practice
-Build your learning streak
-🧠 AI Integration
-How It Works
-After each quiz, Claude 3 Haiku generates personalized study tips
-Tips consider your quiz performance and incorrect answers
-Async processing with loading states
-Offline fallback with curated tips when API is unavailable
-API Configuration
-📊 Data Generation
-Mock questions are generated via Python scripts:
+---
 
-These scripts generate 225 questions with explanations, distributed across 45 chapters.
-
-🔧 Development
-Project Structure
-Running Tests
-Building Release APK
-🐛 Troubleshooting
-AI Tips Not Showing
-Check: local.properties has valid ANTHROPIC_API_KEY
-Fallback: App will show offline tips if key is missing
-Verify: API key format is sk-ant-api-XXXXX
-Database Issues
-Clear: ./gradlew clean to reset build cache
-Reset: Uninstall app and reinstall to repopulate database
-Debug: Check Logcat for database errors
-Quiz Timer Not Working
-Solution: Ensure app has sufficient runtime permissions
-Check: Device time is accurate
-Emulator Performance
-Optimize: Use hardware acceleration (HAXM/WHPX)
-Increase: Emulator RAM to 2GB or higher
-Alternative: Test on physical device for better performance
-📝 License
-This project is part of an internship educational initiative.
-
-👨‍💻 Author
-THARUN GOWDA K
-cd c:\Users\tharu\OneDrive\Desktop\Internship Project\AksharaDeepaTutor
-
-# Stage all changes
-git add .
-
-# Commit with message
-git commit -m "Add comprehensive README documentation and complete modern redesign
-
-- Modern UI with Soft Sage + Deep Olive color palette
-- 6 fully functional screens: Syllabus, Quiz, Strength Map, Daily Goals
-- AI-powered study tips with Claude 3 Haiku
-- 5-question daily quizzes with timer
-- Offline-first design with graceful fallback
-- Complete database schema with 225 mock questions
-- MVVM architecture with Hilt DI
-- Jetpack Compose + Material 3 UI"
-
-# Push to main branch
-git push origin main
+## 📜 License
+Copyright © 2026 Akshara Deepa Tutor. All rights reserved.
+Developed for the 10th-grade SSLC educational empowerment initiative.
