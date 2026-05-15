@@ -1,115 +1,137 @@
-# Akshara Deepa Tutor 🎓
-> **Empowering 10th Grade SSLC Students with AI-Driven Personalized Learning**
+<div align="center">
 
-![Project Banner](file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_mockup_1778821079644.png)
+<img src="file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_logo_modern_1778823006756.png" width="150" height="150" />
 
-## 🌟 Overview
-**Akshara Deepa Tutor** is a premium, offline-first educational platform designed specifically for 10th-grade SSLC students in rural India. By combining the power of **Jetpack Compose**, **Room Database**, and **Generative AI (Gemini/Claude)**, the app provides a seamless study companion that tracks progress, gamifies learning through quizzes, and offers personalized coaching.
+# 🌟 Akshara Deepa Tutor 🌟
+### *Lighting the Path to Academic Excellence for SSLC Students*
 
----
-
-## ✨ Key Features
-
-### 📚 Syllabus & Progress Tracking
-Stay on top of your studies with a comprehensive tracker covering Science, Math, and Social Studies.
-- **45+ Detailed Chapters**: Organized by subject with core concepts.
-- **Visual Progress**: Real-time progress bars for each subject.
-- **Smart Checkmarks**: Instantly mark concepts as "Learned" or "To-Do".
-
-### 🎯 Intelligent Quiz System
-Test your knowledge with timed, subject-specific quizzes.
-- **30-Second Sprints**: Quick-fire questions to build exam speed.
-- **Instant Feedback**: Learn from your mistakes immediately with detailed explanations.
-- **Deterministic Randomization**: Fresh questions every day to keep things interesting.
-
-### 📊 Performance Analytics (Strength Map)
-Visualize your academic growth with high-end data visualization.
-- **Radar Charts**: See your strengths and weaknesses across subjects at a glance.
-- **AI Coach Integration**: Get personalized study tips based on your quiz performance.
-- **Leveling System**: Earn badges as you master different topics.
-
-![Analytics View](file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_analytics_1778821101226.png)
-
-### 🔥 Daily Goals & Streaks
-Build a consistent study habit with gamified goal tracking.
-- **Custom Goals**: Set how many questions you want to solve daily.
-- **Streak Tracking**: Don't break the chain! Visualize your consistency.
-- **Topic Recommendations**: The app suggests what to study next based on your weak points.
+[![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white)](https://developer.android.com/compose)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 
 ---
 
-## 🛠️ Technology Stack
+**Akshara Deepa Tutor** is a state-of-the-art, AI-augmented self-study application designed for 10th-grade students in rural India. It bridges the gap between traditional learning and modern technology with a premium, glassmorphism UI and personalized AI coaching.
 
-| Layer | Technology | Description |
+[Explore Features](#-key-features) • [View Architecture](#-system-architecture) • [Setup Guide](#-installation)
+
+</div>
+
+---
+
+## 📸 App Showcase
+
+<div align="center">
+  <table border="0">
+    <tr>
+      <td width="50%"><img src="file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_mockup_1778821079644.png" alt="Syllabus Tracker" /></td>
+      <td width="50%"><img src="file:///C:/Users/tharu/.gemini/antigravity/brain/8d6fb6e7-f661-4b93-a135-f7ca2abca25f/akshara_deepa_analytics_1778821101226.png" alt="Strength Map" /></td>
+    </tr>
+    <tr>
+      <td align="center"><b>📚 Smart Syllabus Tracker</b></td>
+      <td align="center"><b>📊 Intelligent Strength Map</b></td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🚀 Key Features
+
+### 📖 **Comprehensive Syllabus Hub**
+*   **Subject Mastery**: Full coverage of Science, Math, and Social Studies.
+*   **Progress Visualization**: Dynamic progress rings and bars that update as you learn.
+*   **Concept Management**: Break down chapters into manageable concepts.
+
+### ⚡ **Timed Power Quizzes**
+*   **30s Timer**: Build speed and confidence for final exams.
+*   **Instant Logic**: Immediate feedback with high-quality explanations for every question.
+*   **History Tracking**: Review your past attempts and see your growth over time.
+
+### 🤖 **AI Study Coach**
+*   **Personalized Tips**: AI analyzes your performance to give you "Next Step" advice.
+*   **Performance Analysis**: Ask the AI Coach about your specific strengths and weaknesses.
+*   **Offline Fallback**: Intelligent logic ensures study tips are available even without internet.
+
+### 🔥 **Gamified Consistency**
+*   **Study Streaks**: Keep your daily learning chain alive with visual streak counters.
+*   **Daily Goals**: Set your own target and hit it every day to unlock badges.
+*   **Topic Suggestions**: Smart algorithm recommends topics you need to practice most.
+
+---
+
+## 🛠️ Modern Tech Stack
+
+<div align="center">
+
+| 📱 Mobile Frontend | ⚙️ Backend & API | ☁️ Cloud & AI |
 | :--- | :--- | :--- |
-| **Frontend** | Kotlin & Jetpack Compose | Modern, declarative UI with premium aesthetics. |
-| **Local Database** | Room (SQLite) | Offline-first persistence for all user data. |
-| **Cloud Sync** | FastAPI (Python) | High-performance backend bridge for synchronization. |
-| **Database (Cloud)** | Firebase Firestore | Real-time data sync across devices. |
-| **Authentication** | Firebase Auth | Secure email/password login and signup. |
-| **AI Engine** | Gemini / Claude | Personalized study tips and performance coaching. |
-| **Architecture** | MVVM + Repository | Scalable, maintainable, and testable codebase. |
+| **Kotlin** (Modern Android) | **FastAPI** (Python 3) | **Firebase Auth** (Security) |
+| **Jetpack Compose** (UI) | **Uvicorn** (ASGI Server) | **Firestore** (Real-time DB) |
+| **Room DB** (Local Cache) | **Pydantic** (Validation) | **Gemini / Claude** (Gen AI) |
+| **Hilt** (Dependency Injection) | **Firebase Admin SDK** | **Retrofit** (Networking) |
+
+</div>
 
 ---
 
 ## 🏗️ System Architecture
 
 ```mermaid
-graph TD
-    A[Mobile App - Jetpack Compose] --> B[ViewModel Layer]
-    B --> C[Repository Layer]
-    C --> D[(Room Local DB)]
-    C --> E[FastAPI Backend]
-    E --> F[Firebase Firestore]
-    E --> G[Firebase Auth]
-    E --> H[AI Models - Gemini/Claude]
+graph LR
+    subgraph "Client Side (Android)"
+    UI[Jetpack Compose UI] --> VM[ViewModel Layer]
+    VM --> Repo[Repository Layer]
+    Repo --> Room[(Room Local DB)]
+    end
+
+    subgraph "Backend Layer"
+    Repo --> API[FastAPI Gateway]
+    API --> Sync[Progress Sync Service]
+    API --> AI[AI Coaching Service]
+    end
+
+    subgraph "Cloud Services"
+    Sync --> Firestore[(Firebase Firestore)]
+    AI --> Gemini[Google Gemini API]
+    Auth[Firebase Auth] <--> UI
+    end
+
+    style UI fill:#f9f,stroke:#333,stroke-width:2px
+    style API fill:#bbf,stroke:#333,stroke-width:2px
+    style Gemini fill:#dfd,stroke:#333,stroke-width:2px
 ```
 
 ---
 
-## 🚀 Getting Started
+## 📥 Installation
 
-### Prerequisites
-- **Android Studio** (Koala or newer)
-- **Python 3.10+**
-- **Firebase Account** (for authentication and firestore)
+### 1️⃣ **Clone & Prep**
+```bash
+git clone https://github.com/THARUN-GOWDA-K/AksharaDeepa-Tutor-App.git
+```
 
-### 1. Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   .\.venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Set up your `.env` file with your **Firebase Service Account Key** and **AI API Keys**.
-5. Run the server:
-   ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
+### 2️⃣ **Backend Startup**
+```bash
+cd backend
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-### 2. Android App Setup
-1. Open the `AksharaDeepaTutor` project in Android Studio.
-2. Add your `google-services.json` file to the `app/` directory.
-3. Sync Gradle and run the app on an emulator (use `10.0.2.2` to connect to the local backend).
+### 3️⃣ **Android Launch**
+*   Open `AksharaDeepaTutor` in Android Studio.
+*   Add `google-services.json` to the `app/` folder.
+*   Sync Gradle & Run on Emulator! 🚀
 
 ---
 
-## 🛡️ Troubleshooting
+<div align="center">
 
-### Data Persistence Issues
-- **Backend Running?**: Ensure your FastAPI server is active in the background.
-- **Firebase Config**: Verify that you have created a **Firestore Database** in the Firebase Console.
-- **Local Network**: Ensure `android:usesCleartextTraffic="true"` is enabled in the Manifest for local testing.
+**Built with ❤️ for the future of education in India.**  
+© 2026 Akshara Deepa Tutor Platform
 
----
-
-## 📜 License
-Copyright © 2026 Akshara Deepa Tutor. All rights reserved.
-Developed for the 10th-grade SSLC educational empowerment initiative.
+</div>
